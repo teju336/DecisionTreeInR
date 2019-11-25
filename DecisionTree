@@ -1,0 +1,37 @@
+library(MASS)
+library(rpart)
+set.seed(456)
+help("birthwt")
+df <- data.frame(birthwt)
+str(df)
+dim(df)
+help("apply")
+apply(df,2,function(x) round(length(unique(x))/nrow(df),3)*100)
+categoryvar <- c("low","race","smoke","ptl","ht","ui","ftv")
+na.omit()
+for(i in categoryvar)
+{
+  df[,i]=as.factor(df[,i])
+}
+str(df)
+library(caTools)
+
+
+ds <- sample.split(Y = df$low,SplitRatio = 0.8)
+traindf <- df[ds,]
+testdf <- df[ds,]
+dtm <- rpart(low ~ . -bwt, data = traindf,method = 'class')
+plot(dtm)
+library(party)
+dt1 <- ctree(low ~ bwt,data = traindf )
+plot(dt1)
+predictweight <- predict(dt1)
+table_mat <- table(testdf$bwt, predictweight)
+table_mat
+text(dtm,pretty = 0)
+summary(dtm)
+
+pwc <- predict(dtm, testdf,type = 'class')
+tab <- table(predictions = pwc, actual=testdf$low)
+
+sum(diag(tab))/sum(tab)
